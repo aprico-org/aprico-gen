@@ -1,0 +1,31 @@
+{
+  "name": "aprico-gen",
+  "description": "Deterministic password generator library based on scrypt algorithm.",
+  "version": "1.0.0",
+  "main": "aprico-gen.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "uglifyjs aprico-gen.js --verbose --comments /^!/ -m -c -o aprico-gen.min.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aprico-org/aprico-gen.git"
+  },
+  "keywords": [
+    "javascript",
+    "password-generator",
+    "scrypt"
+  ],
+  "author": "Pino Ceniccola",
+  "license": "GPL-2.0-or-later",
+  "bugs": {
+    "url": "https://github.com/aprico-org/aprico-gen/issues"
+  },
+  "homepage": "https://github.com/aprico-org/aprico-gen/issues",
+  "dependencies": {
+    "scrypt-async": "^2.0.0"
+  },
+  "devDependencies": {
+    "uglify-es": ">=2.8.22"
+  }
+}
