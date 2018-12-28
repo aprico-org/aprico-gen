@@ -1,5 +1,5 @@
 /*!
- * Aprico-gen
+ * aprico-gen
  * Deterministic password generator library based on scrypt algorithm. 
  * Copyright (c) 2018 Pino Ceniccola | GPLv3
  * https://aprico.org
@@ -11,7 +11,7 @@ const aprico = (()=> {
 	const scrypt = (typeof module !== 'undefined' && module.exports) ? require('scrypt-async') : window.scrypt;
 
 	if (typeof scrypt !== 'function')
-		throw new Error("Aprico requires scrypt-async-js library.");
+		throw new Error("aprico requires scrypt-async-js library.");
 
 	const VERSION = "1.0.0";
 
@@ -51,12 +51,10 @@ const aprico = (()=> {
 	* using Base 10 as an intermediate base for conversion.
 	* Used by _hashToAlphabet().
 	* (Adapted from: https://rot47.net/base.html)
-	*
-	* @param {string} src 	  	String to convert
-	* @param {string} srctable	Source character set
-	* @param {string} srcdest	Destination character set
-	*
-	* @returns {string} 	   	Converted string
+	* @param {string} src - String to convert.
+	* @param {string} srctable - Source character set.
+	* @param {string} srcdest - Destination character set.
+	* @returns {string} Converted string.
 	*/
 	const _convert = (src, srctable, desttable) => {
 		const srclen = srctable.length;
@@ -83,10 +81,8 @@ const aprico = (()=> {
 	/**
 	 * Convert full hex hash to password format
 	 * set by options (alphabet and length)
-	 *
-	 * @param   {string} hash 	Hash in hex format
-	 *
-	 * @returns {string} 		The generated password
+	 * @param {string} hash - Hash in hex format.
+	 * @returns {string} The generated password.
 	 */
 	const _hashToAlphabet = (hash) => {
 		let alphabet = '';
@@ -100,20 +96,20 @@ const aprico = (()=> {
 		let split = hash.match(/(.{1,7})/g);
 		for (let i = 0, l = split.length-1; i < l; i++) {
 
-    		//[debug] console.log('Split', split);
+			//[debug] console.log('Split', split);
 
-    		// Re-hash every slice when revealing a potentially
-    		// large chunk of the original hash.
-    		if (options.length > 9) {
+			// Re-hash every slice when revealing a potentially
+			// large chunk of the original hash.
+			if (options.length > 9) {
 
-    			//[debug] console.log('Re-hashing', hash, split[l-i-1]);
+				//[debug] console.log('Re-hashing', hash, split[l-i-1]);
 
-    			scrypt (hash, split[l-i-1], SCRYPT_COST_FAST, function(hash){
-    				split = hash.match(/(.{1,7})/g);
-    			});
-    		}
+				scrypt (hash, split[l-i-1], SCRYPT_COST_FAST, (hash) => {
+					split = hash.match(/(.{1,7})/g);
+				});
+			}
 
-    		result += _convert(split[i], '0123456789abcdef', alphabet);
+			result += _convert(split[i], '0123456789abcdef', alphabet);
 
 		};
 
@@ -146,10 +142,8 @@ const aprico = (()=> {
 	/**
 	 * Check if the generated password has characters from
 	 * every alphabet set. If not, re-hash until conditions are met.
-	 *
-	 * @param   {object} results	Password + Hash
-	 *
-	 * @returns {object} 			Password + Hash
+	 * @param {object} results - Password + Hash.
+	 * @returns {object} Password + Hash.
 	 */
 	const _checkAndIterate = (results) => {
 
@@ -175,7 +169,7 @@ const aprico = (()=> {
 				//[debug] console.log('Iterating', results);
 
 				// Re-hash until conditions are met.
-				scrypt (results.hash, results.pass, SCRYPT_COST_FAST, function(hash){
+				scrypt (results.hash, results.pass, SCRYPT_COST_FAST, (hash) => {
 
 					results.hash = hash;
 					results.pass = _hashToAlphabet(hash);
@@ -193,8 +187,7 @@ const aprico = (()=> {
 
 	/**
 	 * Merge and check user options.
-	 *
-	 * @param   {object} user_options	User options
+	 * @param {object} user_options	- User options.
 	 */
 	const _checkOptions = (user_options) => {
 
@@ -219,13 +212,11 @@ const aprico = (()=> {
 
 	/**
 	 * Deterministic password generation main function.
-	 *
-	 * @param   {string} password		User Master Password
-	 * @param   {string} service		User service/domain
-	 * @param   {string} hashId			Precomputed hash ID
-	 * @param   {object} user_options	User options
-	 *
-	 * @returns {object} 				Password + Hash
+	 * @param {string} password	- User Master Password.
+	 * @param {string} service - User service/domain.
+	 * @param {string} hashId - Precomputed hash ID.
+	 * @param {object} user_options	- User options.
+	 * @returns {object} Password + Hash.
 	 */
 	const getPassword = (password, service, hashId, user_options) => {
 
@@ -241,7 +232,7 @@ const aprico = (()=> {
 
 		let results = {};
 
-		scrypt (pass, hashId, SCRYPT_COST, function(hash){
+		scrypt (pass, hashId, SCRYPT_COST, (hash) => {
 
 			results.hash = hash;
 			results.pass = _hashToAlphabet(hash);
@@ -260,10 +251,8 @@ const aprico = (()=> {
 
 	/**
 	 * Generate an hash from the user ID.
-	 *
-	 * @param   {string} id 	User ID
-	 *
-	 * @returns {string} 		Hash ID
+	 * @param {string} id - User ID.
+	 * @returns {string} Hash ID.
 	 */
 	const getHashId = (id) => {
 		let output = '';
@@ -280,7 +269,7 @@ const aprico = (()=> {
 
 		//[debug] console.log('Hash ID salt',salt);
 
-		scrypt(id, salt, SCRYPT_COST, function(hash) {
+		scrypt(id, salt, SCRYPT_COST, (hash) => {
 			output = hash;
 		});
 
@@ -291,10 +280,8 @@ const aprico = (()=> {
 	/**
 	 * If Service is a URL, it is stripped down to hostname (and
 	 * perhaps port number) to improve usability.
-	 *
-	 * @param   {string} service 	User Service
-	 *
-	 * @returns {string} 			Normalized Service
+	 * @param {string} service - User Service.
+	 * @returns {string} - Normalized Service.
 	 */
 	const normalizeService = (service) => {
 
