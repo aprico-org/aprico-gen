@@ -250,19 +250,19 @@ const aprico = (()=> {
 
 
 	/**
-	 * Generate an hash from the user ID.
+	 * Generate a hash from the user ID.
 	 * @param {string} id - User ID.
 	 * @returns {string} Hash ID.
 	 */
 	const getHashId = (id) => {
 		let output = '';
 
-		// In order to create an hash from the ID using scrypt,
+		// In order to create a hash from the ID using scrypt,
 		// we need to generate some deterministic salt and it's
 		// not a bad thing.
 		// Rationale: ID is a salt. It's not a secret.
 		// We are not hashing a password.
-		// We are converting ID to an hash more for convenience 
+		// We are converting ID to a hash more for convenience 
 		// than security here.
 		let salt = Math.pow(id.length, (id.match(/[aeiou]/gi) || [0,0,0]).length)+'';
 		salt = _convert(salt, '0123456789.e+Infity', ALPHABET.numbers+ALPHABET.symbols+ALPHABET.letters)+'';
