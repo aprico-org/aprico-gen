@@ -13,7 +13,7 @@ const aprico = (()=> {
 	if (typeof scrypt !== 'function')
 		throw new Error("aprico requires scrypt-async-js library.");
 
-	const VERSION = "1.0.0";
+	const VERSION = "1.1.0";
 
 	const SCRYPT_COST = {
     	N: Math.pow(2,14),
