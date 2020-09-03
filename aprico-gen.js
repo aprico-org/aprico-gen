@@ -1,6 +1,6 @@
 /*!
  * aprico-gen
- * Deterministic password generator library based on scrypt algorithm. 
+ * Deterministic password generator library based on scrypt algorithm.
  * Copyright (c) 2018 Pino Ceniccola | GPLv3
  * https://aprico.org
  */
@@ -13,7 +13,7 @@ const aprico = (()=> {
 	if (typeof scrypt !== 'function')
 		throw new Error("aprico requires scrypt-async-js library.");
 
-	const VERSION = "1.1.0";
+	const VERSION = "1.1.1";
 
 	const SCRYPT_COST = {
     	N: Math.pow(2,14),
@@ -104,9 +104,7 @@ const aprico = (()=> {
 
 				//[debug] console.log('Re-hashing', hash, split[l-i-1]);
 
-				scrypt (hash, split[l-i-1], SCRYPT_COST_FAST, (hash) => {
-					split = hash.match(/(.{1,7})/g);
-				});
+				scrypt (hash, split[l-i-1], SCRYPT_COST_FAST, (hash) => split = hash.match(/(.{1,7})/g) );
 			}
 
 			result += _convert(split[i], '0123456789abcdef', alphabet);
@@ -169,12 +167,9 @@ const aprico = (()=> {
 				//[debug] console.log('Iterating', results);
 
 				// Re-hash until conditions are met.
-				scrypt (results.hash, results.pass, SCRYPT_COST_FAST, (hash) => {
+				scrypt (results.hash, results.pass, SCRYPT_COST_FAST, (hash) => results.hash = hash );
 
-					results.hash = hash;
-					results.pass = _hashToAlphabet(hash);
-
-				});
+				results.pass = _hashToAlphabet(results.hash);
 
 			}
 
@@ -232,19 +227,17 @@ const aprico = (()=> {
 
 		let results = {};
 
-		scrypt (pass, hashId, SCRYPT_COST, (hash) => {
+		// Note: scrypt callback is called immediately, in a synchronous fashion here.
+		// See https://github.com/dchest/scrypt-async-js#usage
+		scrypt (pass, hashId, SCRYPT_COST, (hash) => results.hash = hash);
 
-			results.hash = hash;
-			results.pass = _hashToAlphabet(hash);
+		results.pass = _hashToAlphabet(results.hash);
+		results = _checkAndIterate(results);
 
-			results = _checkAndIterate(results);
-
-		});
-		
 		//[debug] console.log('Results', results);
-		
+
 		return results;
-		
+
 	};
 
 
@@ -262,16 +255,14 @@ const aprico = (()=> {
 		// not a bad thing.
 		// Rationale: ID is a salt. It's not a secret.
 		// We are not hashing a password.
-		// We are converting ID to a hash more for convenience 
+		// We are converting ID to a hash more for convenience
 		// than security here.
 		let salt = Math.pow(id.length, (id.match(/[aeiou]/gi) || [0,0,0]).length)+'';
 		salt = _convert(salt, '0123456789.e+Infity', ALPHABET.numbers+ALPHABET.symbols+ALPHABET.letters)+'';
 
 		//[debug] console.log('Hash ID salt',salt);
 
-		scrypt(id, salt, SCRYPT_COST, (hash) => {
-			output = hash;
-		});
+		scrypt(id, salt, SCRYPT_COST, (hash) => output = hash);
 
 		return output;
 	};

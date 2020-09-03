@@ -8,12 +8,12 @@ This javascript library generates passwords that:
 
 For the full implementation see [aprico.org](https://aprico.org).
 
-Uses the [scrypt-async-js](https://github.com/dchest/scrypt-async-js) `scrypt` javascript implementation.
+Uses the [scrypt-async-js](https://github.com/dchest/scrypt-async-js) library for the `scrypt` implementation.
 
 How it works
 ------------
 
-User inputs are concatenated and hashed through the `scrypt` algorithm with a cost of N = 2^14. The resulting hash is then splitted, re-iterated with a lighter cost (N = 2^5) while arbirtary converted to a custom alphabet made of letters, numbers and/or symbols.
+User inputs are concatenated and hashed through the `scrypt` algorithm with a cost of `N = 2^14`. The resulting hash is then splitted, re-iterated with a lighter cost (`N = 2^5`) while arbitrary converted to a custom alphabet made of letters, numbers and/or symbols.
 
 The result is checked for some conditions (at least a character for each alphabet, no character repeated more than 2 times) and eventually re-hashed until those conditions are met.
 
@@ -22,15 +22,15 @@ Install
 
 `aprico-gen` is available on NPM:
 
-    $ npm i aprico-gen 
+    $ npm i aprico-gen
 
-You can use it as a CommonJS module:
+You can use it as a CommonJS module for both node.js and the browser (For node.js there are better built-in implementations but for this specific purpose `scrypt-async-js` should be good enough):
 
     const aprico = require('aprico-gen');
 
 Or directly in your browser (but without dependencies, so you may want to include also the `scrypt-async-js` library):
 
-```javascript
+```html
 <script src="https://unpkg.com/scrypt-async@2.0.1/scrypt-async.min.js"></script>
 <script src="https://unpkg.com/aprico-gen"></script>
 ```
@@ -38,9 +38,13 @@ Or directly in your browser (but without dependencies, so you may want to includ
 API
 ---
 
+Note: As you can see, this library is written in a synchronous fashion (also `scrypt-async-js`, despite its name, is used synchronously). The library is fast enough to avoid any browser freezing. More than that, with the used parameters, from my findings this sync implementation is actually faster than an async one.
+
 #### `getPassword(password, service, hashId, options)`
 
 Derives a unique password and a hash based on user inputs. You can use the hash as an entropy source to implement your own alphabet or to create other deterministic derivatives. `hashId` is actually used as a salt, you can use a hash pre-generated with `getHashId` (see later) or implement your own.
+
+Some characters are missing from the alphabet (`l`, `I`, `O` and `0`). This is by design, to avoid ambiguity in generated passwords (like `1lI0O`) and make them less prone to misreading for users.
 
 ```javascript
 // default options:
@@ -58,7 +62,7 @@ console.log(results);
 // {
 //  	pass: 'vnscMKN_9z5a$cQC+J8G',
 //  	hash: 'f9e5ce41fc655f8cdd2a103e0ed7b1db99a4618f517d6aa324e406268a650d96'
-// }
+// }
 ```
 
 #### `getHashId(id)`
@@ -74,7 +78,7 @@ console.log(hashId)
 
 #### `normalizeService(service)`
 
-Returns a lowecased `service` and, if it is a URL, it is stripped down to hostname only to improve user usability.
+Returns a lowecased `service` and, if it is a URL, it is stripped down to hostname only to improve usability. Note: This function is exposed mainly as a way to reflect the normalized service in UIs as `getPassword` already calls this internally when generating a password.
 
 ```javascript
 let service = aprico.normalizeService('https://www.website.com/login');
@@ -109,5 +113,7 @@ See [CHANGELOG.md](CHANGELOG.md)
 
 License
 -------
+
+© Pino Ceniccola
 
 This project is licensed under the GPLv3 License - see [LICENSE](LICENSE) for details.
