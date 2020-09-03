@@ -1,7 +1,7 @@
 {
   "name": "aprico-gen",
   "description": "Deterministic password generator library based on scrypt algorithm.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "aprico-gen.js",
   "unpkg": "aprico-gen.min.js",
   "scripts": {
